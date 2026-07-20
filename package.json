@@ -1,8 +1,9 @@
 {
-  "name": "webhook-bot",
-  "main": "index.js",
+  "name": "tiengaylo",
+  "version": "1.0.0",
+  "main": "tiengaylo.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node tiengaylo.js"
   },
   "dependencies": {
     "discord.js": "^14.14.1",
