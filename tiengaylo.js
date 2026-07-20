@@ -81,17 +81,16 @@ async function sendAndCleanup() {
         }
 
         // --- EMBED 1: DÀNH CHO FREE FIRE ---
-        const embedFF = new EmbedBuilder()
-            .setTitle('🔥 TỔNG HỢP LINK TẢI FREE FIRE (IPA & TIPA)')
-            .setColor('#FF5500')
-            .setDescription('Chọn đúng bản Free Fire bạn cần tải bên dưới:')
-            .setTimestamp();
-
-        let ffContent = '';
+        let ffContent = 'Chọn đúng bản Free Fire bạn cần tải bên dưới:\n\n';
         FF_DOWNLOADS.forEach(item => {
             ffContent += `• **${item.name}**\n  📌 *${item.desc}*\n  🔗 [Bấm vào đây để tải](${item.url})\n\n`;
         });
-        embedFF.addFields({ name: '📦 DANH SÁCH FILE FREE FIRE', value: ffContent, inline: false });
+
+        const embedFF = new EmbedBuilder()
+            .setTitle('🔥 TỔNG HỢP LINK TẢI FREE FIRE (IPA & TIPA)')
+            .setColor('#FF5500')
+            .setDescription(ffContent) // Dùng Description chứa được 4096 ký tự
+            .setTimestamp();
 
 
         // --- EMBED 2: DÀNH CHO LIÊN QUÂN MOBILE ---
@@ -100,14 +99,12 @@ async function sendAndCleanup() {
             .setColor('#5865F2')
             .setTimestamp();
 
-        // Link tải LQ
         embedLQ.addFields({
             name: '📥 LINK TẢI LIÊN QUÂN',
             value: `• **${LQ_DOWNLOAD.name}**\n  📌 *${LQ_DOWNLOAD.desc}*\n  🔗 [Bấm vào đây để tải](${LQ_DOWNLOAD.url})`,
             inline: false
         });
 
-        // Chi tiết cập nhật LQ (Ghi rõ tránh nhầm lẫn)
         let lqNotesText = '';
         LQ_UPDATE_NOTES.forEach(note => {
             lqNotesText += `🔹 ${note}\n`;
@@ -131,7 +128,7 @@ async function sendAndCleanup() {
             .setFooter({ text: 'Download Center • Tự động cập nhật mỗi 24h' })
             .setTimestamp();
 
-        // Gửi cả 3 Embed cùng lúc trong 1 tin nhắn
+        // Gửi cả 3 Embed cùng lúc
         const response = await webhookClient.send({
             embeds: [embedFF, embedLQ, embedGuide],
             wait: true
