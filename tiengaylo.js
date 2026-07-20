@@ -118,6 +118,6 @@ app.listen(PORT, () => {
     sendAndCleanup();
 
     // Lặp lại quá trình xóa & gửi mới sau mỗi 60 giây
-    const INTERVAL_60S = 60 * 1000;
+    const INTERVAL_60S = 24 * 60 * 60 * 1000;
     setInterval(sendAndCleanup, INTERVAL_60S);
 });
