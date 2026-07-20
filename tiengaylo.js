@@ -1,66 +1,69 @@
-const { WebhookClient, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { WebhookClient, EmbedBuilder } = require('discord.js');
 const express = require('express');
 
-// 1. Khởi tạo Web Server để giữ Render luôn ở trạng thái "Live"
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// 2. Cấu hình Webhook URL
-const WEBHOOK_URL = 'https://discord.com/api/webhooks/1528789899178672338/rgoVyZp-mKzoSvY-QoBPsCH8e0hTS5sSbJAfk5FcIBHtcWbVwcH3kvo8ScPlIOUeGrJi';
+// Khởi tạo Webhook Client
+const WEBHOOK_URL = 'https://discord.com/api/webhooks/1528458052884234393/XKgLKDRQ4SRzkKO0TNVgljpdEWxTVPQLWRsxe71kqAga126QPIxXSuNAX9s6SEHe28-u';
+const webhookClient = new WebhookClient({ url: WEBHOOK_URL });
 
-// 3. Danh sách sản phẩm
+// Biến toàn cục lưu ID tin nhắn gần nhất
+let lastMessageId = null;
+
+// Danh sách sản phẩm & link tải
 const PRODUCTS = [
     {
         title: '🇻🇳 Migui Việt Nam',
         description: 'Dành cho người chơi tại Việt Nam',
-        buttonLabel: '📥 Tải Migui VN',
         url: 'https://cdn.authtool.app/user_39QQInVf1DKz83SmVKQApc9ewdV/ipa/1784307460807-d7zeq5lqqj9-Free_Fire_1.126.1_1784306058.ipa',
         active: true
     },
     {
         title: '🌍 Migui Global',
         description: 'Dành cho người chơi quốc tế',
-        buttonLabel: '📥 Tải Migui Global',
         url: 'https://cdn.authtool.app/user_39QQInVf1DKz83SmVKQApc9ewdV/ipa/1784308355701-1q56fhng73z-Free_Fire_1.126.1_1784307627.ipa',
         active: true
     },
     {
         title: '💧 Drip Client Android',
         description: 'APK dành cho Android',
-        buttonLabel: '📥 Tải Drip Client',
         url: 'https://www.mediafire.com/file/kcywrq5i1sxvx2t/DPFF-APKM0D-V2.2x-BETA.apks/file',
         active: true
     },
     {
         title: '🚧 Đang cập nhật...',
         description: 'Sản phẩm mới sẽ sớm ra mắt',
-        buttonLabel: 'Coming Soon 1',
         url: null,
         active: false
     },
     {
         title: '🚧 Đang cập nhật...',
         description: 'Sản phẩm mới sẽ sớm ra mắt',
-        buttonLabel: 'Coming Soon 2',
         url: null,
         active: false
     },
     {
         title: '🚧 Đang cập nhật...',
         description: 'Sản phẩm mới sẽ sớm ra mắt',
-        buttonLabel: 'Coming Soon 3',
         url: null,
         active: false
     }
 ];
 
-// Hàm gửi Webhook
-async function executeWebhook() {
-    const webhookClient = new WebhookClient({ url: WEBHOOK_URL });
-
+async function sendAndCleanup() {
     try {
-        console.log('🚀 Đang khởi tạo Embed Download Center...');
+        // 1. Nếu đã có lastMessageId, tiến hành xóa tin nhắn cũ
+        if (lastMessageId) {
+            try {
+                await webhookClient.deleteMessage(lastMessageId);
+                console.log(`🗑️ Đã xóa tin nhắn cũ (ID: ${lastMessageId})`);
+            } catch (err) {
+                console.log('⚠️ Không thể xóa tin nhắn cũ (có thể đã bị xóa trước đó).');
+            }
+        }
 
+        // 2. Tạo giao diện Embed với đường link xanh bấm trực tiếp
         const embed = new EmbedBuilder()
             .setTitle('📥 DOWNLOAD MIGUI IOS')
             .setColor('#5865F2')
@@ -73,58 +76,48 @@ async function executeWebhook() {
             .setTimestamp();
 
         PRODUCTS.forEach(product => {
-            embed.addFields({
-                name: product.title,
-                value: `> ${product.description}`,
-                inline: false
-            });
+            if (product.active) {
+                embed.addFields({
+                    name: product.title,
+                    value: `> ${product.description}\n🔗 **Link tải:** [Bấm vào đây để tải](${product.url})`,
+                    inline: false
+                });
+            } else {
+                embed.addFields({
+                    name: product.title,
+                    value: `> ${product.description}`,
+                    inline: false
+                });
+            }
         });
 
-        const rows = [];
-
-        // 3 Sản phẩm chính
-        PRODUCTS.filter(p => p.active).forEach(product => {
-            const btn = new ButtonBuilder()
-                .setLabel(product.buttonLabel)
-                .setStyle(ButtonStyle.Link)
-                .setURL(product.url);
-
-            rows.push(new ActionRowBuilder().addComponents(btn));
-        });
-
-        // Hàng nút "Coming Soon"
-        const comingSoonRow = new ActionRowBuilder();
-        PRODUCTS.filter(p => !p.active).forEach((product, index) => {
-            const disabledBtn = new ButtonBuilder()
-                .setCustomId(`coming_soon_${index + 1}`)
-                .setLabel(product.buttonLabel)
-                .setStyle(ButtonStyle.Secondary)
-                .setDisabled(true);
-
-            comingSoonRow.addComponents(disabledBtn);
-        });
-
-        rows.push(comingSoonRow);
-
-        await webhookClient.send({
+        // 3. Gửi tin nhắn mới (truyền wait: true để lấy thông tin response)
+        const response = await webhookClient.send({
             embeds: [embed],
-            components: rows
+            wait: true
         });
 
-        console.log('✅ Đã gửi giao diện Download Center thành công!');
+        // 4. Lưu lại ID của tin nhắn vừa gửi
+        if (response && response.id) {
+            lastMessageId = response.id;
+            console.log(`✅ Đã gửi tin nhắn mới thành công (ID: ${lastMessageId})`);
+        }
 
     } catch (error) {
-        console.error('❌ Lỗi gửi Webhook:', error);
-    } finally {
-        webhookClient.destroy();
+        console.error('❌ Lỗi tiến trình Webhook:', error.message);
     }
 }
 
-// Route kiểm tra trạng thái cho Render
+// Web Server giữ kết nối cho Render
 app.get('/', (req, res) => res.send('Migui Download Center Service is Online!'));
 
-// Lắng nghe cổng và kích hoạt Webhook
 app.listen(PORT, () => {
     console.log(`🌐 Server đang lắng nghe tại port ${PORT}...`);
-    executeWebhook();
+
+    // Chạy lần đầu ngay khi khởi động
+    sendAndCleanup();
+
+    // Lặp lại quá trình xóa & gửi mới sau mỗi 60 giây
+    const INTERVAL_60S = 60 * 1000;
+    setInterval(sendAndCleanup, INTERVAL_60S);
 });
