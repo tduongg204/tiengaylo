@@ -4,56 +4,51 @@ const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Khởi tạo Webhook Client
+// Webhook URL
 const WEBHOOK_URL = 'https://discord.com/api/webhooks/1528789899178672338/rgoVyZp-mKzoSvY-QoBPsCH8e0hTS5sSbJAfk5FcIBHtcWbVwcH3kvo8ScPlIOUeGrJi';
 const webhookClient = new WebhookClient({ url: WEBHOOK_URL });
 
-// Biến toàn cục lưu ID tin nhắn gần nhất
 let lastMessageId = null;
 
-// Danh sách sản phẩm & link tải
-const PRODUCTS = [
+// 1. DANH SÁCH LINK TẢI (Tách riêng biệt)
+const DOWNLOAD_LIST = [
     {
-        title: '🇻🇳 Migui Việt Nam',
-        description: 'Dành cho người chơi tại Việt Nam',
-        url: 'https://cdn.authtool.app/user_39QQInVf1DKz83SmVKQApc9ewdV/ipa/1784307460807-d7zeq5lqqj9-Free_Fire_1.126.1_1784306058.ipa',
-        active: true
+        name: '🎮 Liên Quân Mobile (Chấp Tố)',
+        desc: 'Bản IPA mới nhất',
+        url: 'https://www.mediafire.com/file/o050st9p8g6g71f/Lie%CC%82n+Qua%CC%82n+Mobile_1.63.11692297_1783524379.ipa/file'
     },
     {
-        title: '🌍 Migui Global',
-        description: 'Dành cho người chơi quốc tế',
-        url: 'https://cdn.authtool.app/user_39QQInVf1DKz83SmVKQApc9ewdV/ipa/1784308355701-1q56fhng73z-Free_Fire_1.126.1_1784307627.ipa',
-        active: true
+        name: '🇻🇳 Migui Việt Nam',
+        desc: 'Free Fire IPA VN',
+        url: 'https://cdn.authtool.app/user_39QQInVf1DKz83SmVKQApc9ewdV/ipa/1784307460807-d7zeq5lqqj9-Free_Fire_1.126.1_1784306058.ipa'
     },
     {
-        title: '💧 Drip Client Android',
-        description: 'APK dành cho Android',
-        url: 'https://www.mediafire.com/file/kcywrq5i1sxvx2t/DPFF-APKM0D-V2.2x-BETA.apks/file',
-        active: true
+        name: '🌍 Migui Global',
+        desc: 'Free Fire IPA Global',
+        url: 'https://cdn.authtool.app/user_39QQInVf1DKz83SmVKQApc9ewdV/ipa/1784308355701-1q56fhng73z-Free_Fire_1.126.1_1784307627.ipa'
     },
     {
-        title: '🚧 Đang cập nhật...',
-        description: 'Sản phẩm mới sẽ sớm ra mắt',
-        url: null,
-        active: false
-    },
-    {
-        title: '🚧 Đang cập nhật...',
-        description: 'Sản phẩm mới sẽ sớm ra mắt',
-        url: null,
-        active: false
-    },
-    {
-        title: '🚧 Đang cập nhật...',
-        description: 'Sản phẩm mới sẽ sớm ra mắt',
-        url: null,
-        active: false
+        name: '💧 Drip Client Android',
+        desc: 'File APK dành cho Android',
+        url: 'https://www.mediafire.com/file/kcywrq5i1sxvx2t/DPFF-APKM0D-V2.2x-BETA.apks/file'
     }
 ];
 
+// 2. CHI TIẾT BẢN CẬP NHẬT TIPA
+const UPDATE_NOTES = [
+    'Sửa lỗi mất ESP con chim ở lane Rồng / Tà Thần đầu game',
+    'Sửa Auto Trừng Trị trong chế độ Hỗn Chiến Phù Hiệu',
+    'Chỉ Auto Trừng Trị khi có tướng địch cách đó 15m (giảm tốc độ trừng trị)',
+    'Bỏ qua Aimbot khi không có tầm nhìn'
+];
+
+// 3. HƯỚNG DẪN & LƯU Ý
+const VIDEO_GUIDE_URL = 'https://www.mediafire.com/file/lps79itynoq6au0/Messenger_creation_889407713754254.mp4/file';
+const NOTE_STABILITY = 'IPA và Link Trực Tiếp tính năng như nhau, nhưng link trực tiếp dễ văng app hơn. Cài file IPA qua ESign sẽ bền bỉ và ổn định hơn nhiều.';
+
 async function sendAndCleanup() {
     try {
-        // 1. Nếu đã có lastMessageId, tiến hành xóa tin nhắn cũ
+        // Xóa tin nhắn cũ trước khi gửi tin nhắn mới
         if (lastMessageId) {
             try {
                 await webhookClient.deleteMessage(lastMessageId);
@@ -63,44 +58,44 @@ async function sendAndCleanup() {
             }
         }
 
-        // 2. Tạo giao diện Embed với đường link xanh bấm trực tiếp
+        // Tạo Embed
         const embed = new EmbedBuilder()
-            .setTitle('📥 DOWNLOAD MIGUI IOS')
+            .setTitle('📥 TỔNG HỢP LINK TẢI & CHI TIẾT CẬP NHẬT')
             .setColor('#5865F2')
-            .setDescription(
-                'Chọn đúng phiên bản bạn cần tải bên dưới.\n\n' +
-                '✅ **Luôn cập nhật bản mới nhất**\n' +
-                '⚡ **Tốc độ tải nhanh**'
-            )
-            .setFooter({ text: 'Migui Download Center' })
+            .setDescription('Chọn đúng phiên bản cần tải bên dưới. Tất cả các link đều được cập nhật mới nhất.\n')
+            .setFooter({ text: 'Download Center • Tự động cập nhật' })
             .setTimestamp();
 
-        PRODUCTS.forEach(product => {
-            if (product.active) {
-                embed.addFields({
-                    name: product.title,
-                    value: `> ${product.description}\n🔗 **Link tải:** [Bấm vào đây để tải](${product.url})`,
-                    inline: false
-                });
-            } else {
-                embed.addFields({
-                    name: product.title,
-                    value: `> ${product.description}`,
-                    inline: false
-                });
-            }
+        // Field 1: Danh sách Link Tải
+        let downloadsContent = '';
+        DOWNLOAD_LIST.forEach(item => {
+            downloadsContent += `• **${item.name}** (${item.desc})\n  🔗 [Bấm vào đây để tải](${item.url})\n\n`;
+        });
+        embed.addFields({ name: '📌 DANH SÁCH LINK TẢI', value: downloadsContent, inline: false });
+
+        // Field 2: Nội dung Cập Nhật TIPA
+        let updateContent = '';
+        UPDATE_NOTES.forEach(note => {
+            updateContent += `🔹 ${note}\n`;
+        });
+        embed.addFields({ name: '📝 CHI TIẾT CẬP NHẬT TIPA', value: updateContent, inline: false });
+
+        // Field 3: Hướng dẫn & Lưu ý
+        embed.addFields({
+            name: '🎬 HƯỚNG DẪN & LƯU Ý',
+            value: `▶️ **Video HD cài IPA bằng ESign:** [Xem / Tải Video](${VIDEO_GUIDE_URL})\n💡 **Lưu ý:** ${NOTE_STABILITY}`,
+            inline: false
         });
 
-        // 3. Gửi tin nhắn mới (truyền wait: true để lấy thông tin response)
+        // Gửi tin nhắn mới & lưu ID
         const response = await webhookClient.send({
             embeds: [embed],
             wait: true
         });
 
-        // 4. Lưu lại ID của tin nhắn vừa gửi
         if (response && response.id) {
             lastMessageId = response.id;
-            console.log(`✅ Đã gửi tin nhắn mới thành công (ID: ${lastMessageId})`);
+            console.log(`✅ Đã gửi Embed mới thành công (ID: ${lastMessageId})`);
         }
 
     } catch (error) {
@@ -108,16 +103,16 @@ async function sendAndCleanup() {
     }
 }
 
-// Web Server giữ kết nối cho Render
-app.get('/', (req, res) => res.send('Migui Download Center Service is Online!'));
+// Khởi chạy Web Server cho Render
+app.get('/', (req, res) => res.send('Download Center Service Online!'));
 
 app.listen(PORT, () => {
     console.log(`🌐 Server đang lắng nghe tại port ${PORT}...`);
 
-    // Chạy lần đầu ngay khi khởi động
+    // Gửi lần đầu tiên khi khởi động
     sendAndCleanup();
 
-    // Lặp lại quá trình xóa & gửi mới sau mỗi 60 giây
-    const INTERVAL_60S = 24 * 60 * 60 * 1000;
-    setInterval(sendAndCleanup, INTERVAL_60S);
+    // Lặp lại tự động mỗi 24 giờ
+    const INTERVAL_24H = 24 * 60 * 60 * 1000;
+    setInterval(sendAndCleanup, INTERVAL_24H);
 });
