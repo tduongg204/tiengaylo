@@ -1,75 +1,122 @@
 const { WebhookClient, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const express = require('express');
-const app = express();
 
-const webhookClient = new WebhookClient({ 
-    url: 'https://discord.com/api/webhooks/1528789899178672338/rgoVyZp-mKzoSvY-QoBPsCH8e0hTS5sSbJAfk5FcIBHtcWbVwcH3kvo8ScPlIOUeGrJi' 
-});
+// 1. Cấu hình Webhook URL
+const WEBHOOK_URL = 'https://discord.com/api/webhooks/1528458052884234393/XKgLKDRQ4SRzkKO0TNVgljpdEWxTVPQLWRsxe71kqAga126QPIxXSuNAX9s6SEHe28-u';
 
-// Biến lưu ID của tin nhắn vừa gửi gần nhất
-let lastMessageId = null;
+// 2. Danh sách sản phẩm (Dễ dàng thêm/sửa link tại đây)
+const PRODUCTS = [
+    {
+        title: '🇻🇳 Migui Việt Nam',
+        description: 'Dành cho người chơi tại Việt Nam',
+        buttonLabel: '📥 Tải Migui VN',
+        url: 'https://cdn.authtool.app/user_39QQInVf1DKz83SmVKQApc9ewdV/ipa/1784307460807-d7zeq5lqqj9-Free_Fire_1.126.1_1784306058.ipa',
+        active: true
+    },
+    {
+        title: '🌍 Migui Global',
+        description: 'Dành cho người chơi quốc tế',
+        buttonLabel: '📥 Tải Migui Global',
+        url: 'https://cdn.authtool.app/user_39QQInVf1DKz83SmVKQApc9ewdV/ipa/1784308355701-1q56fhng73z-Free_Fire_1.126.1_1784307627.ipa',
+        active: true
+    },
+    {
+        title: '💧 Drip Client Android',
+        description: 'APK dành cho Android',
+        buttonLabel: '📥 Tải Drip Client',
+        url: 'https://www.mediafire.com/file/kcywrq5i1sxvx2t/DPFF-APKM0D-V2.2x-BETA.apks/file',
+        active: true
+    },
+    // Các ô chờ cập nhật sau
+    {
+        title: '🚧 Đang cập nhật...',
+        description: 'Sản phẩm mới sẽ sớm ra mắt',
+        buttonLabel: 'Coming Soon 1',
+        url: null,
+        active: false
+    },
+    {
+        title: '🚧 Đang cập nhật...',
+        description: 'Sản phẩm mới sẽ sớm ra mắt',
+        buttonLabel: 'Coming Soon 2',
+        url: null,
+        active: false
+    },
+    {
+        title: '🚧 Đang cập nhật...',
+        description: 'Sản phẩm mới sẽ sớm ra mắt',
+        buttonLabel: 'Coming Soon 3',
+        url: null,
+        active: false
+    }
+];
 
-async function sendAndCycleWebhook() {
+async function executeWebhook() {
+    const webhookClient = new WebhookClient({ url: WEBHOOK_URL });
+
     try {
-        // 1. Nếu đã có tin nhắn từ lần gửi trước, tiến hành xóa
-        if (lastMessageId) {
-            try {
-                await webhookClient.deleteMessage(lastMessageId);
-                console.log(`🗑️ Đã xóa tin nhắn cũ (ID: ${lastMessageId})`);
-            } catch (err) {
-                console.error('⚠️ Không thể xóa tin nhắn cũ (có thể đã bị xóa thủ công):', err.message);
-            }
-        }
+        console.log('🚀 Đang khởi tạo Embed Download Center...');
 
-        // 2. Cấu trúc bảng & Embed
-        const tableString = `\`\`\`\n┌──────────────────────┬──────────────────────┐\n│ Sản Phẩm             │ 📥 Link Download     │\n├──────────────────────┼──────────────────────┤\n│ Migul VN             │ Bấm Vào Đây          │\n├──────────────────────┼──────────────────────┤\n│ Migul Global         │ Bấm Vào Đây          │\n└──────────────────────┴──────────────────────┘\n\`\`\``;
-
+        // Tạo Embed chính
         const embed = new EmbedBuilder()
-            .setTitle('📥 Download Migul iOS')
-            .setColor('#4A90E2')
-            .setDescription(`Chọn đúng phiên bản bạn cần tải.\n\n${tableString}`)
-            .setFooter({ text: 'Migul iOS • Latest Version' })
+            .setTitle('📥 DOWNLOAD MIGUI IOS')
+            .setColor('#5865F2') // Màu Blurple chuẩn Discord Dark Mode
+            .setDescription(
+                'Chọn đúng phiên bản bạn cần tải bên dưới.\n\n' +
+                '✅ **Luôn cập nhật bản mới nhất**\n' +
+                '⚡ **Tốc độ tải nhanh**'
+            )
+            .setFooter({ text: 'Migui Download Center' })
             .setTimestamp();
 
-        const btnVN = new ButtonBuilder()
-            .setLabel('🇻🇳 Migul VN')
-            .setStyle(ButtonStyle.Link)
-            .setURL('https://l.messenger.com/l.php?u=https%3A%2F%2Fcdn.authtool.app%2Fuser_39QQInVf1DKz83SmVKQApc9ewdV%2Fipa%2F1784307460807-d7zeq5lqqj9-Free_Fire_1.126.1_1784306058.ipa&h=AUAyM5eN-tLE6sLsZ2hv7HVCAnsWNV2WxLWRz1GjDyl1h_89b3939f-yjLQfchJfSPy0k3P9bZr79Mx0ifHVINx3UU-4pUIKfCrJSzcyFmAXh9XEBJCKstiA8xhGkzXC6-euyA');
-
-        const btnGlobal = new ButtonBuilder()
-            .setLabel('🌍 Migul Global')
-            .setStyle(ButtonStyle.Link)
-            .setURL('https://l.messenger.com/l.php?u=https%3A%2F%2Fcdn.authtool.app%2Fuser_39QQInVf1DKz83SmVKQApc9ewdV%2Fipa%2F1784308355701-1q56fhng73z-Free_Fire_1.126.1_1784307627.ipa&h=AUAyM5eN-tLE6sLsZ2hv7HVCAnsWNV2WxLWRz1GjDyl1h_89b3939f-yjLQfchJfSPy0k3P9bZr79Mx0ifHVINx3UU-4pUIKfCrJSzcyFmAXh9XEBJCKstiA8xhGkzXC6-euyA');
-
-        const actionRow = new ActionRowBuilder().addComponents(btnVN, btnGlobal);
-
-        // 3. Gửi tin nhắn mới (bắt buộc có wait: true để trả về object tin nhắn)
-        const sentMessage = await webhookClient.send({ 
-            embeds: [embed], 
-            components: [actionRow],
-            wait: true
+        // Thêm danh sách sản phẩm vào Embed Fields
+        PRODUCTS.forEach(product => {
+            embed.addFields({
+                name: product.title,
+                value: `> ${product.description}`,
+                inline: false
+            });
         });
 
-        // Lưu lại ID để xóa ở chu kỳ tiếp theo
-        lastMessageId = sentMessage.id;
-        console.log(`✅ Đã gửi tin nhắn mới (ID: ${lastMessageId})`);
+        // Tạo các ActionRow cho Nút bấm
+        const rows = [];
+
+        // 3 Sản phẩm chính (mỗi nút 1 dòng riêng)
+        PRODUCTS.filter(p => p.active).forEach(product => {
+            const btn = new ButtonBuilder()
+                .setLabel(product.buttonLabel)
+                .setStyle(ButtonStyle.Link)
+                .setURL(product.url);
+
+            rows.push(new ActionRowBuilder().addComponents(btn));
+        });
+
+        // Gom các nút "Coming Soon" vào 1 Hàng Nút (để không vượt quá giới hạn 5 ActionRow của Discord)
+        const comingSoonRow = new ActionRowBuilder();
+        PRODUCTS.filter(p => !p.active).forEach((product, index) => {
+            const disabledBtn = new ButtonBuilder()
+                .setCustomId(`coming_soon_${index + 1}`)
+                .setLabel(product.buttonLabel)
+                .setStyle(ButtonStyle.Secondary)
+                .setDisabled(true);
+
+            comingSoonRow.addComponents(disabledBtn);
+        });
+
+        rows.push(comingSoonRow);
+
+        // Gửi Embed lên Discord
+        await webhookClient.send({
+            embeds: [embed],
+            components: rows
+        });
+
+        console.log('✅ Đã gửi giao diện Download Center thành công!');
 
     } catch (error) {
-        console.error('❌ Lỗi tiến trình Webhook:', error);
+        console.error('❌ Lỗi gửi Webhook:', error);
+    } finally {
+        webhookClient.destroy();
     }
 }
 
-// Server giữ kết nối port trên Render
-app.get('/', (req, res) => res.send('Webhook Auto-Cycle Service Online'));
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`🌐 Server đang chạy trên port ${PORT}...`);
-
-    // Gửi ngay lần đầu tiên khi dịch vụ khởi động
-    sendAndCycleWebhook();
-
-    // Lặp lại sau mỗi 24 giờ (24 * 60 * 60 * 1000 ms)
-    const INTERVAL_24H = 24 * 60 * 60 * 1000;
-    setInterval(sendAndCycleWebhook, INTERVAL_24H);
-});
+executeWebhook();
