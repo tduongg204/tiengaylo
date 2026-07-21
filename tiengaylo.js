@@ -42,7 +42,7 @@ const FF_DOWNLOADS = [
     {
         name: '💧 Drip Client Android',
         desc: 'File APK dành riêng cho máy Android',
-        url: 'https://www.mediafire.com/file/kcywrq5i1sxvx2t/DPFF-APKM0D-V2.2x-BETA.apks/file'
+        url: 'https://www.mediafire.com/file/7666056zfyw1gwa/DPFF-APKM0D-v2.3x-BETA.apks/file'
     }
 ];
 
