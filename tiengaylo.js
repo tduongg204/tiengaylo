@@ -30,12 +30,12 @@ const FF_DOWNLOADS = [
         url: 'https://www.mediafire.com/file/6ng4cy3s6n2h0yr/FF_Exsudo.tipa/file'
     },
     {
-        name: '🇻🇳 Migui Việt Nam IPA',
+        name: '🇻🇳 MIGUL Việt Nam IPA',
         desc: 'Free Fire IPA Server VN',
         url: 'https://cdn.authtool.app/user_39QQInVf1DKz83SmVKQApc9ewdV/ipa/1784307460807-d7zeq5lqqj9-Free_Fire_1.126.1_1784306058.ipa'
     },
     {
-        name: '🌍 Migui Global IPA',
+        name: '🌍 MIGUL Global IPA',
         desc: 'Free Fire IPA Server Global',
         url: 'https://cdn.authtool.app/user_39QQInVf1DKz83SmVKQApc9ewdV/ipa/1784308355701-1q56fhng73z-Free_Fire_1.126.1_1784307627.ipa'
     },
@@ -57,7 +57,7 @@ const LQ_DOWNLOAD = {
 
 const LQ_UPDATE_NOTES = [
     'Sửa lỗi mất ESP con chim ở lane Rồng / Tà Thần đầu game',
-    'Sửa Auto Trừng Trị trong chế độ Hỗn Chiến Phù Hiệu',
+    'Sửa Auto Trừng Trị trong chế độ Hỗน Chiến Phù Hiệu',
     'Chỉ Auto Trừng Trị khi có tướng địch cách đó 15m (giảm tốc độ trừng trị)',
     'Bỏ qua Aimbot khi không có tầm nhìn'
 ];
@@ -89,9 +89,8 @@ async function sendAndCleanup() {
         const embedFF = new EmbedBuilder()
             .setTitle('🔥 TỔNG HỢP LINK TẢI FREE FIRE (IPA & TIPA)')
             .setColor('#FF5500')
-            .setDescription(ffContent) // Dùng Description chứa được 4096 ký tự
+            .setDescription(ffContent)
             .setTimestamp();
-
 
         // --- EMBED 2: DÀNH CHO LIÊN QUÂN MOBILE ---
         const embedLQ = new EmbedBuilder()
@@ -114,7 +113,6 @@ async function sendAndCleanup() {
             value: lqNotesText,
             inline: false
         });
-
 
         // --- EMBED 3: HƯỚNG DẪN & LƯU Ý ---
         const embedGuide = new EmbedBuilder()
