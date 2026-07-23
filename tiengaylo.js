@@ -32,12 +32,12 @@ const FF_DOWNLOADS = [
     {
         name: '🇻🇳 MIGUL Việt Nam IPA',
         desc: 'Free Fire IPA Server VN',
-        url: 'https://cdn.authtool.app/user_39QQInVf1DKz83SmVKQApc9ewdV/ipa/1784307460807-d7zeq5lqqj9-Free_Fire_1.126.1_1784306058.ipa'
+        url: 'https://cdn.authtool.app/user_39QQInVf1DKz83SmVKQApc9ewdV/ipa/1784734444408-muu2l5er3h-Free_Fire_1.126.1_1784727892.ipa'
     },
     {
         name: '🌍 MIGUL Global IPA',
         desc: 'Free Fire IPA Server Global',
-        url: 'https://cdn.authtool.app/user_39QQInVf1DKz83SmVKQApc9ewdV/ipa/1784308355701-1q56fhng73z-Free_Fire_1.126.1_1784307627.ipa'
+        url: 'https://cdn.authtool.app/user_39QQInVf1DKz83SmVKQApc9ewdV/ipa/1784735100948-qlo19of841o-Free_Fire_1.126.1_1784734571.ipa'
     },
     {
         name: '💧 Drip Client Android',
